@@ -30,6 +30,13 @@ for f,(src,cr,assign) in PLAN.items():
         mm=ca>0.9; mc=c[...,:3][mm].mean(0); y=Y(c[...,:3])[mm].mean()
         lg=TY/y; g=lg*(TC/(mc*lg))**0.5; g*=TY/Y(c[...,:3][mm]*g).mean()
         c[...,:3]=np.clip(c[...,:3]*g,0,255)
+        # natural pork-fat colour: creamy off-white with a faint pink tint
+        rgb=c[...,:3]; Lf=rgb.mean(-1); Sf=rgb.max(-1)-rgb.min(-1)
+        wf=np.clip((Lf-128)/40,0,1)*np.clip((0.85-Sf/np.maximum(Lf,1))/0.3,0,1)
+        wf=ndi.gaussian_filter(wf,0.8)[...,None]
+        tint=np.array([1.075,0.975,0.95])
+        Ln=np.clip(Lf*1.06+8,0,240)[...,None]
+        c[...,:3]=np.clip(rgb*(1-wf)+Ln*tint*wf,0,255)
         by,bx=np.array(np.where(m)).mean(1); cy,cx=(np.array(np.where(ca>0.5)).mean(1))
         oy,ox=int(round(by-cy)),int(round(bx-cx))
         y0,x0=max(oy,0),max(ox,0); y1,x1=min(oy+c.shape[0],H),min(ox+c.shape[1],W)
