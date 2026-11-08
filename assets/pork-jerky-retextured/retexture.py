@@ -2,7 +2,7 @@ import numpy as np, sys
 from PIL import Image, ImageFilter
 from scipy import ndimage as ndi
 I='/tmp/claude-0/-home-user-yays/eaa79dd2-13a7-5736-b283-2a924eb0d92f/images/'
-TEX={'t7':(7,(680,470,1450,1110)),'t9':(9,(450,450,1500,990)),'t10':(10,(330,560,1600,1000)),
+TEX={'t7':(7,(680,470,1450,1110)),'t9':(9,(470,500,1480,990)),'t10':(10,(330,560,1600,1000)),
      't6a':(6,(1170,260,1540,540)),'t6b':(6,(470,820,900,1140)),'t8':(8,(620,600,1280,1000))}
 def tex(k): n,b=TEX[k]; return Image.open(f'{I}{n}.jpg').convert('RGB').crop(b)
 def fill_texture(shape_hw, bbox, key, angle):
