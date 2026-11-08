@@ -34,8 +34,10 @@ for f,(src,cr,assign) in PLAN.items():
         rgb=c[...,:3]; Lf=rgb.mean(-1); Sf=rgb.max(-1)-rgb.min(-1)
         wf=np.clip((Lf-128)/40,0,1)*np.clip((0.85-Sf/np.maximum(Lf,1))/0.3,0,1)
         wf=ndi.gaussian_filter(wf,0.8)[...,None]
-        tint=np.array([1.075,0.975,0.95])
-        Ln=np.clip(Lf*1.06+8,0,240)[...,None]
+        if f==1:   # warmer cream fat for piece 1
+            tint=np.array([1.12,1.0,0.78]); Ln=np.clip(Lf*0.95+2,0,212)[...,None]
+        else:
+            tint=np.array([1.075,0.975,0.95]); Ln=np.clip(Lf*1.06+8,0,240)[...,None]
         c[...,:3]=np.clip(rgb*(1-wf)+Ln*tint*wf,0,255)
         by,bx=np.array(np.where(m)).mean(1); cy,cx=(np.array(np.where(ca>0.5)).mean(1))
         oy,ox=int(round(by-cy)),int(round(bx-cx))
