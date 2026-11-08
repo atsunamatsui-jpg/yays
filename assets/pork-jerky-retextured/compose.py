@@ -73,6 +73,12 @@ for f,(src,cr,assign) in PLAN.items():
     mix=np.where(valid,mix,1.0)[...,None]
     layer[...,:3]=layer[...,:3]*(1-mix)+src*mix
     layer[...,3]=newa*255
+    # slightly translucent fat along the edges
+    rgbL=layer[...,:3]; Lf=rgbL.mean(-1); Sf=rgbL.max(-1)-rgbL.min(-1)
+    fatw=np.clip((Lf-140)/35,0,1)*np.clip((0.6-Sf/np.maximum(Lf,1))/0.25,0,1)
+    rim=np.clip(1-ndi.distance_transform_edt(hard)/40,0,1)
+    fatw=ndi.gaussian_filter(fatw*rim,1.5)
+    layer[...,3]*=1-0.32*fatw
     pa=layer[...,3]/255; piece=pa>0.5
     dn=ndi.distance_transform_edt(~piece); bi=np.clip((dn/2).astype(int),0,len(prof)-1)
     near=np.where(dn<bins[-1],prof[bi],0)
