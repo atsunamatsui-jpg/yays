@@ -38,6 +38,34 @@ for f,(src,cr,assign) in PLAN.items():
         dst[...,:3]=sub[...,:3]*sa+dst[...,:3]*(1-sa)
         dst[...,3:]=sa*255+dst[...,3:]*(1-sa)
         print(f,key,'scale %.2f'%sc)
+    # ---- edge clean-up ----
+    hard=layer[...,3]>140
+    st=ndi.generate_binary_structure(2,1)
+    hard=ndi.binary_opening(hard,st,iterations=3)          # drop thin fibres/strands
+    lab,n=ndi.label(hard); sz=ndi.sum(hard,lab,range(1,n+1))
+    hard=np.isin(lab,np.where(sz>=0.01*sz.max())[0]+1)    # drop specks
+    holes=ndi.binary_fill_holes(hard)&~hard; hl,hn=ndi.label(holes)
+    if hn:
+        hs=ndi.sum(holes,hl,range(1,hn+1)); hard|=np.isin(hl,np.where(hs<400)[0]+1)
+    # trim protruding light fat lumps / strands
+    disk=np.hypot(*np.mgrid[-7:8,-7:8])<=7
+    opened=ndi.binary_opening(hard,disk)
+    Lc=layer[...,:3].mean(-1)
+    lumps=hard&~opened&ndi.binary_dilation((Lc>125)&hard,iterations=2)
+    hard=hard&~lumps
+    lab,n=ndi.label(hard); sz=ndi.sum(hard,lab,range(1,n+1)); hard=np.isin(lab,np.where(sz>=0.01*sz.max())[0]+1)
+    hard=ndi.binary_erosion(hard,iterations=2)             # trim light fringe
+    g=ndi.gaussian_filter(hard.astype(np.float32),1.6)
+    newa=np.clip((g-0.5)*2.2+0.5,0,1)
+    valid=layer[...,3]>200
+    inner=ndi.binary_erosion(hard&valid,iterations=5)
+    idx=ndi.distance_transform_edt(~inner,return_distances=False,return_indices=True)
+    src=layer[...,:3][idx[0],idx[1]]
+    d=ndi.distance_transform_edt(inner==0)*(1)  # distance from inner core
+    mix=np.clip(d/6,0,1)*0.75
+    mix=np.where(valid,mix,1.0)[...,None]
+    layer[...,:3]=layer[...,:3]*(1-mix)+src*mix
+    layer[...,3]=newa*255
     pa=layer[...,3]/255; piece=pa>0.5
     dn=ndi.distance_transform_edt(~piece); bi=np.clip((dn/2).astype(int),0,len(prof)-1)
     near=np.where(dn<bins[-1],prof[bi],0)
