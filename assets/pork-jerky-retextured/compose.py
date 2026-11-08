@@ -20,6 +20,7 @@ for f,(src,cr,assign) in PLAN.items():
     layer=np.zeros((H,W,4),np.float32)
     for m,(key,ang,fl) in zip(pieces,assign):
         im=Image.open(f'pool/{key}.png').convert('RGBA')
+        if f==1: im=im.resize((im.width,int(im.height*1.25)),Image.LANCZOS)   # wider slice
         if fl: im=im.transpose(Image.FLIP_LEFT_RIGHT)
         im=im.rotate(ang,expand=True,resample=Image.BICUBIC)
         c=np.array(im).astype(np.float32)
