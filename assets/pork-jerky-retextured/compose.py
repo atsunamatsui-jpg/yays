@@ -2,8 +2,8 @@ import numpy as np, sys
 from PIL import Image
 from scipy import ndimage as ndi
 from match import beef_pieces
-PLAN={1:('refs/r1',6,[('lo-10-grain-slab',-20,1)]),
-      2:('refs/r2',0,[('lo-01-triangle',-20,0),('hi9',160,1),('lo-03-small-chunk',-170,1)]),
+PLAN={1:('refs/r1',6,[('hi9',-50,1)]),
+      2:('refs/r2',0,[('lo-01-triangle',-20,0),('lo-06-small-rect',0,1),('lo-03-small-chunk',-170,1)]),
       3:('refs/r3',0,[('hi7',60,0)]),
       4:('refs/r4',0,[('lo-04-marbled-square',-60,0)])}
 def Y(x): return x[...,0]*.299+x[...,1]*.587+x[...,2]*.114
